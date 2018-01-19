@@ -7,7 +7,7 @@ import (
 )
 
 func TestSystemGetCudaDriverVersion(t *testing.T) {
-	w := create(t)
+	w, _ := create(t)
 	defer w.Shutdown()
 
 	version, err := w.SystemGetCudaDriverVersion()
@@ -16,7 +16,7 @@ func TestSystemGetCudaDriverVersion(t *testing.T) {
 }
 
 func TestSystemGetDriverVersion(t *testing.T) {
-	w := create(t)
+	w, _ := create(t)
 	defer w.Shutdown()
 
 	version, err := w.SystemGetDriverVersion()
@@ -25,7 +25,7 @@ func TestSystemGetDriverVersion(t *testing.T) {
 }
 
 func TestSystemGetNVMLVersion(t *testing.T) {
-	w := create(t)
+	w, _ := create(t)
 	defer w.Shutdown()
 
 	version, err := w.SystemGetNVMLVersion()
@@ -34,7 +34,7 @@ func TestSystemGetNVMLVersion(t *testing.T) {
 }
 
 func TestSystemGetProcessName(t *testing.T) {
-	w := create(t)
+	w, _ := create(t)
 	defer w.Shutdown()
 
 	name, err := w.SystemGetProcessName(1336)

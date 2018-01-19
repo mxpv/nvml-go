@@ -2,17 +2,13 @@ package nvml
 
 import (
 	"C"
-	"fmt"
 	"syscall"
 	"unsafe"
+
+	"github.com/pkg/errors"
 )
 
-type Device uintptr
-
-const (
-	nvmlSystemDriverVersionBufferSize = 80
-	nvmlDeviceNameBufferSize          = 64
-)
+var ErrNotImplemented = errors.New("Not implemented")
 
 type wrapper struct {
 	dll *syscall.DLL
@@ -119,7 +115,7 @@ type wrapper struct {
 func (w wrapper) call(p *syscall.Proc, a ...uintptr) error {
 	ret, _, _ := p.Call(a...)
 	if ret != 0 {
-		return fmt.Errorf("%s call failed with error: %d %s", p.Name, ret, w.ErrorString(ret))
+		return returnValueToError(int(ret))
 	}
 
 	return nil

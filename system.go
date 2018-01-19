@@ -7,15 +7,15 @@ import (
 
 // SystemGetCudaDriverVersion retrieves the version of the CUDA driver.
 // The returned CUDA driver version is the same as the CUDA API cuDriverGetVersion() would return on the system.
-func (w wrapper) SystemGetCudaDriverVersion() (cudaDriverVersion int, err error) {
+func (w wrapper) SystemGetCudaDriverVersion() (cudaDriverVersion int32, err error) {
 	err = w.call(w.nvmlSystemGetCudaDriverVersion, uintptr(unsafe.Pointer(&cudaDriverVersion)))
 	return
 }
 
 // SystemGetDriverVersion retrieves the version of the system's graphics driver.
 func (w wrapper) SystemGetDriverVersion() (string, error) {
-	buffer := [nvmlSystemDriverVersionBufferSize]C.char{}
-	if err := w.call(w.nvmlSystemGetDriverVersion, uintptr(unsafe.Pointer(&buffer[0])), nvmlSystemDriverVersionBufferSize); err != nil {
+	buffer := [systemDriverVersionBufferSize]C.char{}
+	if err := w.call(w.nvmlSystemGetDriverVersion, uintptr(unsafe.Pointer(&buffer[0])), systemDriverVersionBufferSize); err != nil {
 		return "", err
 	}
 
@@ -24,8 +24,8 @@ func (w wrapper) SystemGetDriverVersion() (string, error) {
 
 // SystemGetNVMLVersion retrieves the version of the NVML library.
 func (w wrapper) SystemGetNVMLVersion() (string, error) {
-	buffer := [nvmlSystemDriverVersionBufferSize]C.char{}
-	if err := w.call(w.nvmlSystemGetNVMLVersion, uintptr(unsafe.Pointer(&buffer[0])), nvmlSystemDriverVersionBufferSize); err != nil {
+	buffer := [systemDriverVersionBufferSize]C.char{}
+	if err := w.call(w.nvmlSystemGetNVMLVersion, uintptr(unsafe.Pointer(&buffer[0])), systemDriverVersionBufferSize); err != nil {
 		return "", err
 	}
 

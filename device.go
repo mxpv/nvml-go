@@ -1,349 +1,883 @@
 package nvml
 
-func (w wrapper) DeviceClearCpuAffinity() {
+// #include <stdlib.h>
+import "C"
 
+import (
+	"unsafe"
+)
+
+// DeviceClearCpuAffinity clears all affinity bindings for the calling thread. Note, this is a change as of version 8.0
+// as older versions cleared the affinity for a calling process and all children.
+func (w wrapper) DeviceClearCpuAffinity(device Device) (err error) {
+	err = w.call(w.nvmlDeviceClearCpuAffinity, uintptr(device))
+	return
 }
 
-func (w wrapper) DeviceGetAPIRestriction() {
+// DeviceGetAPIRestriction retrieves the root/admin permissions on the target API.
+// See nvmlRestrictedAPI_t for the list of supported APIs.
+// If an API is restricted only root users can call that API.
+// See nvmlDeviceSetAPIRestriction to change current permissions.
+func (w wrapper) DeviceGetAPIRestriction(device Device, apiType RestrictedAPI) (bool, error) {
+	var state int32 = 0
+	if err := w.call(w.nvmlDeviceGetAPIRestriction, uintptr(device), uintptr(apiType), uintptr(unsafe.Pointer(&state))); err != nil {
+		return false, err
+	}
 
+	if state > 0 {
+		return true, nil
+	} else {
+		return false, nil
+	}
 }
 
-func (w wrapper) DeviceGetApplicationsClock() {
-
+// DeviceGetApplicationsClock retrieves the current setting of a clock that applications will use unless an overspec
+// situation occurs. Can be changed using DeviceSetApplicationsClocks.
+func (w wrapper) DeviceGetApplicationsClock(device Device, clockType ClockType) (clockMHz uint32, err error) {
+	err = w.call(w.nvmlDeviceGetApplicationsClock, uintptr(device), uintptr(clockType), uintptr(unsafe.Pointer(&clockMHz)))
+	return
 }
 
-func (w wrapper) DeviceGetAutoBoostedClocksEnabled() {
+// DeviceGetAutoBoostedClocksEnabled retrieve the current state of Auto Boosted clocks on a device and store it in isEnabled.
+// Auto Boosted clocks are enabled by default on some hardware, allowing the GPU to run at higher clock rates to
+// maximize performance as thermal limits allow.
+// On Pascal and newer hardware, Auto Aoosted clocks are controlled through application clocks.
+func (w wrapper) DeviceGetAutoBoostedClocksEnabled(device Device) (isEnabled, defaultIsEnabled bool, err error) {
+	var isEnabledInt int32 = 0
+	var defaultIsEnabledInt int32 = 0
 
+	err = w.call(w.nvmlDeviceGetAutoBoostedClocksEnabled, uintptr(device), uintptr(unsafe.Pointer(&isEnabledInt)), uintptr(unsafe.Pointer(&defaultIsEnabledInt)))
+	if err != nil {
+		return
+	}
+
+	if isEnabledInt > 0 {
+		isEnabled = true
+	} else {
+		isEnabled = false
+	}
+
+	if defaultIsEnabledInt > 0 {
+		defaultIsEnabled = true
+	} else {
+		defaultIsEnabled = false
+	}
+
+	return
 }
 
-func (w wrapper) DeviceGetBAR1MemoryInfo() {
-
+// DeviceGetBAR1MemoryInfo gets Total, Available and Used size of BAR1 memory.
+// BAR1 is used to map the FB (device memory) so that it can be directly accessed by the CPU or
+// by 3rd party devices (peer-to-peer on the PCIE bus).
+func (w wrapper) DeviceGetBAR1MemoryInfo(device Device) (mem BAR1Memory, err error) {
+	err = w.call(w.nvmlDeviceGetBAR1MemoryInfo, uintptr(device), uintptr(unsafe.Pointer(&mem)))
+	return
 }
 
-func (w wrapper) DeviceGetBoardId() {
-
+// DeviceGetBoardID retrieves the device boardId from 0-N. Devices with the same boardId indicate GPUs connected to
+// the same PLX. Use in conjunction with DeviceGetMultiGpuBoard() to decide if they are on the same board as well.
+// The boardId returned is a unique ID for the current configuration.
+// Uniqueness and ordering across reboots and system configurations is not guaranteed (i.e. if a Tesla K40c returns
+// 0x100 and the two GPUs on a Tesla K10 in the same system returns 0x200 it is not guaranteed they will always return
+// those values but they will always be different from each other).
+func (w wrapper) DeviceGetBoardID(device Device) (boardID uint32, err error) {
+	err = w.call(w.nvmlDeviceGetBoardId, uintptr(device), uintptr(unsafe.Pointer(&boardID)))
+	return
 }
 
-func (w wrapper) DeviceGetBoardPartNumber() {
+// DeviceGetBoardPartNumber retrieves the the device board part number which is programmed into the board's InfoROM
+func (w wrapper) DeviceGetBoardPartNumber(device Device) (string, error) {
+	const bufferSize = 128
 
+	buffer := [bufferSize]C.char{}
+	if err := w.call(w.nvmlDeviceGetBoardPartNumber, uintptr(device), uintptr(unsafe.Pointer(&buffer[0])), bufferSize); err != nil {
+		return "", err
+	}
+
+	return C.GoString(&buffer[0]), nil
 }
 
-func (w wrapper) DeviceGetBrand() {
-
+// DeviceGetBrand retrieves the brand of this device.
+func (w wrapper) DeviceGetBrand(device Device) (brand BrandType, err error) {
+	err = w.call(w.nvmlDeviceGetBrand, uintptr(device), uintptr(unsafe.Pointer(&brand)))
+	return
 }
 
 func (w wrapper) DeviceGetBridgeChipInfo() {
 
 }
 
-func (w wrapper) DeviceGetClock() {
-
-}
-
-func (w wrapper) DeviceGetClockInfo() {
-
-}
-
-func (w wrapper) DeviceGetComputeMode() {
-
-}
-
-func (w wrapper) DeviceGetComputeRunningProcesses() {
-
-}
-
-func (w wrapper) DeviceGetCount() {
-
-}
-
-func (w wrapper) DeviceGetCpuAffinity() {
-
-}
-
-func (w wrapper) DeviceGetCudaComputeCapability() {
-
-}
-
-func (w wrapper) DeviceGetCurrPcieLinkGeneration() {
-
-}
-
-func (w wrapper) DeviceGetCurrPcieLinkWidth() {
-
-}
-
-func (w wrapper) DeviceGetCurrentClocksThrottleReasons() {
-
-}
-
-func (w wrapper) DeviceGetDecoderUtilization() {
-
-}
-
-func (w wrapper) DeviceGetDefaultApplicationsClock() {
-
-}
-
-func (w wrapper) DeviceGetDetailedEccErrors() {
-
-}
-
-func (w wrapper) DeviceGetDisplayActive() {
-
-}
-
-func (w wrapper) DeviceGetDisplayMode() {
-
-}
-
-func (w wrapper) DeviceGetDriverModel() {
-
-}
-
-func (w wrapper) DeviceGetEccMode() {
-
-}
-
-func (w wrapper) DeviceGetEncoderCapacity() {
-
+// DeviceGetClock retrieves the clock speed for the clock specified by the clock type and clock ID.
+func (w wrapper) DeviceGetClock(device Device, clockType ClockType, clockID ClockID) (clockMHz uint, err error) {
+	err = w.call(w.nvmlDeviceGetClock, uintptr(device), uintptr(clockType), uintptr(clockID), uintptr(unsafe.Pointer(&clockMHz)))
+	return
 }
 
-func (w wrapper) DeviceGetEncoderSessions() {
-
-}
-
-func (w wrapper) DeviceGetEncoderStats() {
-
+// DeviceGetClockInfo retrieves the current clock speeds for the device.
+func (w wrapper) DeviceGetClockInfo(device Device, clockType ClockType) (clock uint32, err error) {
+	err = w.call(w.nvmlDeviceGetClockInfo, uintptr(device), uintptr(clockType), uintptr(unsafe.Pointer(&clock)))
+	return
 }
 
-func (w wrapper) DeviceGetEncoderUtilization() {
-
+// DeviceGetComputeMode retrieves the current compute mode for the device.
+func (w wrapper) DeviceGetComputeMode(device Device) (mode ComputeMode, err error) {
+	err = w.call(w.nvmlDeviceGetComputeMode, uintptr(device), uintptr(unsafe.Pointer(&mode)))
+	return
 }
 
-func (w wrapper) DeviceGetEnforcedPowerLimit() {
+// DeviceGetComputeRunningProcesses gets information about processes with a compute context on a device.
+// This function returns information only about compute running processes (e.g. CUDA application which have
+// active context). Any graphics applications (e.g. using OpenGL, DirectX) won't be listed by this function.
+// Keep in mind that information returned by this call is dynamic and the number of elements might change in time.
+// Allocate more space for infos table in case new compute processes are spawned.
+func (w wrapper) DeviceGetComputeRunningProcesses(device Device) ([]ProcessInfo, error) {
+	var infoCount uint32 = 0
 
-}
+	// Query the current number of running compute processes
+	err := w.call(w.nvmlDeviceGetComputeRunningProcesses, uintptr(device), uintptr(unsafe.Pointer(&infoCount)), 0)
 
-func (w wrapper) DeviceGetFanSpeed() {
+	// None are running
+	if err == nil || infoCount == 0 {
+		return []ProcessInfo{}, nil
+	}
+
+	if err != ErrInsufficientSize {
+		return nil, err
+	}
 
+	list := make([]ProcessInfo, infoCount)
+	err = w.call(w.nvmlDeviceGetComputeRunningProcesses, uintptr(device), uintptr(unsafe.Pointer(&infoCount)), uintptr(unsafe.Pointer(&list[0])))
+	if err != nil {
+		return nil, err
+	}
+
+	return list[:infoCount], nil
+}
+
+// DeviceGetCount retrieves the number of compute devices in the system. A compute device is a single GPU.
+func (w wrapper) DeviceGetCount() (count uint32, err error) {
+	err = w.call(w.nvmlDeviceGetCount, uintptr(unsafe.Pointer(&count)))
+	return
 }
 
-func (w wrapper) DeviceGetGpuOperationMode() {
-
+// DeviceGetCPUAffinity retrieves an array of unsigned ints (sized to cpuSetSize) of bitmasks with the ideal CPU
+// affinity for the device. For example, if processors 0, 1, 32, and 33 are ideal for the device and
+// cpuSetSize == 2, result[0] = 0x3, result[1] = 0x3
+func (w wrapper) DeviceGetCPUAffinity(device Device, cpuSetSize uint32) (cpuSet uint32, err error) {
+	err = w.call(w.nvmlDeviceGetCpuAffinity, uintptr(device), uintptr(cpuSetSize), uintptr(unsafe.Pointer(&cpuSet)))
+	return
 }
 
-func (w wrapper) DeviceGetGraphicsRunningProcesses() {
-
+// DeviceGetCudaComputeCapability retrieves the CUDA compute capability of the device.
+// Returns the major and minor compute capability version numbers of the device.
+// The major and minor versions are equivalent to the CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MINOR and
+// CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR attributes that would be returned by CUDA's cuDeviceGetAttribute().
+func (w wrapper) DeviceGetCudaComputeCapability(device Device) (major, minor int32, err error) {
+	err = w.call(w.nvmlDeviceGetCudaComputeCapability, uintptr(device), uintptr(unsafe.Pointer(&major)), uintptr(unsafe.Pointer(&minor)))
+	return
+}
+
+// DeviceGetCurrPcieLinkGeneration retrieves the current PCIe link generation.
+func (w wrapper) DeviceGetCurrPcieLinkGeneration(device Device) (currLinkGen uint32, err error) {
+	err = w.call(w.nvmlDeviceGetCurrPcieLinkGeneration, uintptr(device), uintptr(unsafe.Pointer(&currLinkGen)))
+	return
+}
+
+// DeviceGetCurrPcieLinkWidth retrieves the current PCIe link width.
+func (w wrapper) DeviceGetCurrPcieLinkWidth(device Device) (currLinkWidth uint32, err error) {
+	err = w.call(w.nvmlDeviceGetCurrPcieLinkWidth, uintptr(device), uintptr(unsafe.Pointer(&currLinkWidth)))
+	return
+}
+
+// DeviceGetCurrentClocksThrottleReasons retrieves current clocks throttling reasons.
+// More than one bit can be enabled at the same time. Multiple reasons can be affecting clocks at once.
+func (w wrapper) DeviceGetCurrentClocksThrottleReasons(device Device) (clocksThrottleReasons ClocksThrottleReason, err error) {
+	err = w.call(w.nvmlDeviceGetCurrentClocksThrottleReasons, uintptr(device), uintptr(unsafe.Pointer(&clocksThrottleReasons)))
+	return
+}
+
+// DeviceGetDecoderUtilization retrieves the current utilization and sampling size in microseconds for the Decoder.
+func (w wrapper) DeviceGetDecoderUtilization(device Device) (utilization, samplingPeriodUs uint32, err error) {
+	err = w.call(w.nvmlDeviceGetDecoderUtilization, uintptr(device), uintptr(unsafe.Pointer(&utilization)), uintptr(unsafe.Pointer(&samplingPeriodUs)))
+	return
+}
+
+// DeviceGetDefaultApplicationsClock retrieves the default applications clock that GPU boots with or
+// defaults to after DeviceResetApplicationsClocks call.
+func (w wrapper) DeviceGetDefaultApplicationsClock(device Device, clockType ClockType) (clockMHz uint32, err error) {
+	err = w.call(w.nvmlDeviceGetDefaultApplicationsClock, uintptr(device), uintptr(clockType), uintptr(unsafe.Pointer(&clockMHz)))
+	return
 }
-
-func (w wrapper) DeviceGetHandleByIndex() {
 
-}
+// DeviceGetDetailedECCErrors retrieves the detailed ECC error counts for the device.
+// Only applicable to devices with ECC. Requires NVML_INFOROM_ECC version 2.0 or higher to report aggregate
+// location-based ECC counts. Requires NVML_INFOROM_ECC version 1.0 or higher to report all other ECC counts.
+// Requires ECC Mode to be enabled.
+// Detailed errors provide separate ECC counts for specific parts of the memory system.
+// Reports zero for unsupported ECC error counters when a subset of ECC error counters are supported.
+// Deprecated: This API supports only a fixed set of ECC error locations.
+// On different GPU architectures different locations are supported, see DeviceGetMemoryErrorCounter
+func (w wrapper) DeviceGetDetailedECCErrors(device Device, errorType MemoryErrorType, counterType ECCCounterType) (*ECCErrorCounts, error) {
+	counts := &ECCErrorCounts{}
+	if err := w.call(w.nvmlDeviceGetDetailedEccErrors, uintptr(device), uintptr(errorType), uintptr(counterType), uintptr(unsafe.Pointer(counts))); err != nil {
+		return nil, err
+	}
+
+	return counts, nil
+}
+
+// DeviceGetDisplayActive retrieves the display active state for the device.
+// This method indicates whether a display is initialized on the device.
+// For example whether X Server is attached to this device and has allocated memory for the screen.
+// Display can be active even when no monitor is physically attached.
+func (w wrapper) DeviceGetDisplayActive(device Device) (bool, error) {
+	var state int32 = 0
+	if err := w.call(w.nvmlDeviceGetDisplayActive, uintptr(device), uintptr(unsafe.Pointer(&state))); err != nil {
+		return false, err
+	}
+
+	if state > 0 {
+		return true, nil
+	} else {
+		return false, nil
+	}
+}
+
+// DeviceGetDisplayMode retrieves the display mode for the device. This method indicates whether a physical display
+// (e.g. monitor) is currently connected to any of the device's connectors.
+func (w wrapper) DeviceGetDisplayMode(device Device) (bool, error) {
+	var state int32 = 0
+	if err := w.call(w.nvmlDeviceGetDisplayMode, uintptr(device), uintptr(unsafe.Pointer(&state))); err != nil {
+		return false, err
+	}
+
+	if state > 0 {
+		return true, nil
+	} else {
+		return false, nil
+	}
+}
+
+// DeviceGetDriverModel retrieves the current and pending driver model for the device.
+// On Windows platforms the device driver can run in either WDDM or WDM (TCC) mode.
+// If a display is attached to the device it must run in WDDM mode. TCC mode is preferred if a display is not attached.
+func (w wrapper) DeviceGetDriverModel(device Device) (current, pending DriverModel, err error) {
+	err = w.call(w.nvmlDeviceGetDriverModel, uintptr(device), uintptr(unsafe.Pointer(&current)), uintptr(unsafe.Pointer(&pending)))
+	return
+}
+
+// DeviceGetECCMode retrieves the current and pending ECC modes for the device.
+// Only applicable to devices with ECC. Requires NVML_INFOROM_ECC version 1.0 or higher.
+// Changing ECC modes requires a reboot. The "pending" ECC mode refers to the target mode following the next reboot.
+func (w wrapper) DeviceGetECCMode(device Device) (current, pending bool, err error) {
+	var currentInt int32 = 0
+	var pendingInt int32 = 0
+
+	err = w.call(w.nvmlDeviceGetEccMode, uintptr(device), uintptr(unsafe.Pointer(&currentInt)), uintptr(unsafe.Pointer(&pendingInt)))
+	if err != nil {
+		return
+	}
+
+	if currentInt > 0 {
+		current = true
+	} else {
+		current = false
+	}
+
+	if pendingInt > 0 {
+		pending = true
+	} else {
+		pending = false
+	}
+
+	return
+}
+
+// DeviceGetEncoderCapacity retrieves the current capacity of the device's encoder, in macroblocks per second.
+func (w wrapper) DeviceGetEncoderCapacity(device Device, encoderQueryType EncoderType) (encoderCapacity uint32, err error) {
+	err = w.call(w.nvmlDeviceGetEncoderCapacity, uintptr(device), uintptr(encoderQueryType), uintptr(unsafe.Pointer(&encoderCapacity)))
+	return
+}
+
+func (w wrapper) DeviceGetEncoderSessions() error {
+	return ErrNotImplemented
+}
+
+// DeviceGetEncoderStats retrieves the current encoder statistics for a given device.
+func (w wrapper) DeviceGetEncoderStats(device Device) (sessionCount, averageFPS, averageLatency uint32, err error) {
+	err = w.call(
+		w.nvmlDeviceGetEncoderStats,
+		uintptr(device),
+		uintptr(unsafe.Pointer(&sessionCount)),
+		uintptr(unsafe.Pointer(&averageFPS)),
+		uintptr(unsafe.Pointer(&averageLatency)))
+	return
+}
+
+// DeviceGetEncoderUtilization retrieves the current utilization and sampling size in microseconds for the Encoder
+func (w wrapper) DeviceGetEncoderUtilization(device Device) (utilization, samplingPeriodUs uint32, err error) {
+	err = w.call(w.nvmlDeviceGetEncoderUtilization, uintptr(device), uintptr(unsafe.Pointer(&utilization)), uintptr(unsafe.Pointer(&samplingPeriodUs)))
+	return
+}
+
+// DeviceGetEnforcedPowerLimit gets the effective power limit that the driver enforces after taking into account all limiters.
+// Note: This can be different from the DeviceGetPowerManagementLimit if other limits are set elsewhere.
+// This includes the out of band power limit interface
+func (w wrapper) DeviceGetEnforcedPowerLimit(device Device) (limit uint32, err error) {
+	err = w.call(w.nvmlDeviceGetEnforcedPowerLimit, uintptr(device), uintptr(unsafe.Pointer(&limit)))
+	return
+}
+
+// DeviceGetFanSpeed retrieves the intended operating speed of the device's fan.
+// Note: The reported speed is the intended fan speed. If the fan is physically blocked and unable to spin,
+// the output will not match the actual fan speed.
+// The fan speed is expressed as a percent of the maximum, i.e. full speed is 100%.
+func (w wrapper) DeviceGetFanSpeed(device Device) (speed uint32, err error) {
+	err = w.call(w.nvmlDeviceGetFanSpeed, uintptr(device), uintptr(unsafe.Pointer(&speed)))
+	return
+}
+
+// DeviceGetGPUOperationMode retrieves the current GOM and pending GOM (the one that GPU will switch to after reboot).
+// For GK110 M-class and X-class Tesla products from the Kepler family.
+// Modes NVML_GOM_LOW_DP and NVML_GOM_ALL_ON are supported on fully supported GeForce products.
+// Not supported on Quadro and Tesla C-class products.
+func (w wrapper) DeviceGetGPUOperationMode(device Device) (current, pending GPUOperationMode, err error) {
+	err = w.call(w.nvmlDeviceGetGpuOperationMode, uintptr(device), uintptr(unsafe.Pointer(&current)), uintptr(unsafe.Pointer(&pending)))
+	return
+}
+
+// DeviceGetGraphicsRunningProcesses get information about processes with a graphics context on a device.
+// This function returns information only about graphics based processes (eg. applications using OpenGL, DirectX).
+// Keep in mind that information returned by this call is dynamic and the number of elements might change in time.
+// Allocate more space for infos table in case new graphics processes are spawned.
+func (w wrapper) DeviceGetGraphicsRunningProcesses(device Device) ([]ProcessInfo, error) {
+	var infoCount uint32 = 0
+
+	// Query the current number of running compute processes
+	err := w.call(w.nvmlDeviceGetGraphicsRunningProcesses, uintptr(device), uintptr(unsafe.Pointer(&infoCount)), 0)
+
+	// None are running
+	if err == nil || infoCount == 0 {
+		return []ProcessInfo{}, nil
+	}
+
+	if err != ErrInsufficientSize {
+		return nil, err
+	}
 
-func (w wrapper) DeviceGetHandleByPciBusId() {
+	list := make([]ProcessInfo, infoCount)
+	err = w.call(w.nvmlDeviceGetGraphicsRunningProcesses, uintptr(device), uintptr(unsafe.Pointer(&infoCount)), uintptr(unsafe.Pointer(&list[0])))
+	if err != nil {
+		return nil, err
+	}
 
+	return list[:infoCount], nil
 }
-
-func (w wrapper) DeviceGetHandleBySerial() {
 
+// DeviceGetHandleByIndex acquires the handle for a particular device, based on its index.
+func (w wrapper) DeviceGetHandleByIndex(index uint32) (device Device, err error) {
+	err = w.call(w.nvmlDeviceGetHandleByIndex, uintptr(index), uintptr(unsafe.Pointer(&device)))
+	return
 }
 
-func (w wrapper) DeviceGetHandleByUUID() {
-
-}
+// DeviceGetHandleByPciBusId acquires the handle for a particular device, based on its PCI bus id.
+// This value corresponds to the nvmlPciInfo_t::busId returned by DeviceGetPciInfo().
+// Starting from NVML 5, this API causes NVML to initialize the target GPU NVML may initialize additional GPUs if:
+//   - The target GPU is an SLI slave
+// Note: NVML 4.304 and older version of nvmlDeviceGetHandleByPciBusId"_v1" returns NVML_ERROR_NOT_FOUND instead of NVML_ERROR_NO_PERMISSION.
+func (w wrapper) DeviceGetHandleByPCIBusID(pciBusID string) (device Device, err error) {
+	cstr := C.CString(pciBusID)
+	defer C.free(unsafe.Pointer(cstr))
+
+	err = w.call(w.nvmlDeviceGetHandleByPciBusId, uintptr(unsafe.Pointer(cstr)), uintptr(unsafe.Pointer(&device)))
+	return
+}
+
+// DeviceGetHandleBySerial acquires the handle for a particular device, based on its board serial number.
+// Starting from NVML 5, this API causes NVML to initialize the target GPU, NVML may initialize additional
+// GPUs as it searches for the target GPU
+func (w wrapper) DeviceGetHandleBySerial(serial string) (device Device, err error) {
+	cstr := C.CString(serial)
+	defer C.free(unsafe.Pointer(cstr))
 
-func (w wrapper) DeviceGetIndex() {
+	err = w.call(w.nvmlDeviceGetHandleBySerial, uintptr(unsafe.Pointer(cstr)), uintptr(unsafe.Pointer(&device)))
+	return
+}
+
+// DeviceGetHandleByUUID acquires the handle for a particular device,
+// based on its globally unique immutable UUID associated with each device.
+func (w wrapper) DeviceGetHandleByUUID(uuid string) (device Device, err error) {
+	cstr := C.CString(uuid)
+	defer C.free(unsafe.Pointer(cstr))
+
+	err = w.call(w.nvmlDeviceGetHandleByUUID, uintptr(unsafe.Pointer(cstr)), uintptr(unsafe.Pointer(&device)))
+	return
+}
+
+// DeviceGetIndex retrieves the NVML index of this device.
+func (w wrapper) DeviceGetIndex(device Device) (index uint32, err error) {
+	err = w.call(w.nvmlDeviceGetIndex, uintptr(device), uintptr(unsafe.Pointer(&index)))
+	return
+}
+
+// DeviceGetInforomConfigurationChecksum retrieves the checksum of the configuration stored in the device's infoROM.
+// Can be used to make sure that two GPUs have the exact same configuration.
+// Current checksum takes into account configuration stored in PWR and ECC infoROM objects.
+// Checksum can change between driver releases or when user changes configuration (e.g. disable/enable ECC)
+func (w wrapper) DeviceGetInforomConfigurationChecksum(device Device) (checksum uint32, err error) {
+	err = w.call(w.nvmlDeviceGetInforomConfigurationChecksum, uintptr(device), uintptr(unsafe.Pointer(&checksum)))
+	return
+}
+
+// DeviceGetInforomImageVersion retrieves the global infoROM image version. Image version just like VBIOS version
+// uniquely describes the exact version of the infoROM flashed on the board in contrast to infoROM object version
+// which is only an indicator of supported features.
+func (w wrapper) DeviceGetInfoROMImageVersion(device Device) (string, error) {
+	buffer := [deviceInfoROMVersionBufferSize]C.char{}
+	if err := w.call(w.nvmlDeviceGetInforomImageVersion, uintptr(device), uintptr(unsafe.Pointer(&buffer[0])), deviceInfoROMVersionBufferSize); err != nil {
+		return "", err
+	}
 
+	return C.GoString(&buffer[0]), nil
 }
 
-func (w wrapper) DeviceGetInforomConfigurationChecksum() {
+// DeviceGetInfoROMVersion retrieves the version information for the device's infoROM object.
+func (w wrapper) DeviceGetInfoROMVersion(device Device, object InfoROMObject) (string, error) {
+	buffer := [deviceInfoROMVersionBufferSize]C.char{}
+	if err := w.call(w.nvmlDeviceGetInforomVersion, uintptr(device), uintptr(object), uintptr(unsafe.Pointer(&buffer[0])), deviceInfoROMVersionBufferSize); err != nil {
+		return "", err
+	}
 
+	return C.GoString(&buffer[0]), nil
 }
 
-func (w wrapper) DeviceGetInforomImageVersion() {
-
+// DeviceGetMaxClockInfo retrieves the maximum clock speeds for the device.
+func (w wrapper) DeviceGetMaxClockInfo(device Device, clockType ClockType) (clock uint32, err error) {
+	err = w.call(w.nvmlDeviceGetMaxClockInfo, uintptr(device), uintptr(clockType), uintptr(unsafe.Pointer(&clock)))
+	return
 }
 
-func (w wrapper) DeviceGetInforomVersion() {
-
+// DeviceGetMaxCustomerBoostClock retrieves the customer defined maximum boost clock speed specified by the given clock type.
+func (w wrapper) DeviceGetMaxCustomerBoostClock(device Device, clockType ClockType) (clockMHz uint32, err error) {
+	err = w.call(w.nvmlDeviceGetMaxCustomerBoostClock, uintptr(device), uintptr(clockType), uintptr(unsafe.Pointer(&clockMHz)))
+	return
 }
-
-func (w wrapper) DeviceGetMaxClockInfo() {
 
+// DeviceGetMaxPcieLinkGeneration retrieves the maximum PCIe link generation possible with this device and system.
+// I.E. for a generation 2 PCIe device attached to a generation 1 PCIe bus the max link generation this function will
+// report is generation 1.
+func (w wrapper) DeviceGetMaxPcieLinkGeneration(device Device) (maxLinkGen uint32, err error) {
+	err = w.call(w.nvmlDeviceGetMaxPcieLinkGeneration, uintptr(device), uintptr(unsafe.Pointer(&maxLinkGen)))
+	return
 }
 
-func (w wrapper) DeviceGetMaxCustomerBoostClock() {
-
+// DeviceGetMaxPcieLinkWidth retrieves the maximum PCIe link width possible with this device and system
+// I.E. for a device with a 16x PCIe bus width attached to a 8x PCIe system bus this function will report a max link width of 8.
+func (w wrapper) DeviceGetMaxPcieLinkWidth(device Device) (maxLinkWidth uint32, err error) {
+	err = w.call(w.nvmlDeviceGetMaxPcieLinkWidth, uintptr(device), uintptr(unsafe.Pointer(&maxLinkWidth)))
+	return
 }
 
-func (w wrapper) DeviceGetMaxPcieLinkGeneration() {
-
+// DeviceGetMemoryErrorCounter retrieves the requested memory error counter for the device.
+// Requires NVML_INFOROM_ECC version 2.0 or higher to report aggregate location-based memory error counts.
+// Requires NVML_INFOROM_ECC version 1.0 or higher to report all other memory error counts.
+// Only applicable to devices with ECC. Requires ECC Mode to be enabled.
+func (w wrapper) DeviceGetMemoryErrorCounter(device Device, errorType MemoryErrorType, counterType ECCCounterType, locationType MemoryLocation) (count uint64, err error) {
+	err = w.call(w.nvmlDeviceGetMemoryErrorCounter,
+		uintptr(device),
+		uintptr(errorType),
+		uintptr(counterType),
+		uintptr(locationType),
+		uintptr(unsafe.Pointer(&count)))
+	return
 }
-
-func (w wrapper) DeviceGetMaxPcieLinkWidth() {
 
+// DeviceGetMemoryInfo retrieves the amount of used, free and total memory available on the device, in bytes.
+func (w wrapper) DeviceGetMemoryInfo(device Device) (mem Memory, err error) {
+	err = w.call(w.nvmlDeviceGetMemoryInfo, uintptr(device), uintptr(unsafe.Pointer(&mem)))
+	return
 }
 
-func (w wrapper) DeviceGetMemoryErrorCounter() {
-
+// DeviceGetMinorNumber retrieves minor number for the device. The minor number for the device is such that
+// the Nvidia device node file for each GPU will have the form /dev/nvidia[minor number].
+func (w wrapper) DeviceGetMinorNumber(device Device) (minorNumber uint32, err error) {
+	err = w.call(w.nvmlDeviceGetMinorNumber, uintptr(device), uintptr(unsafe.Pointer(&minorNumber)))
+	return
 }
 
-func (w wrapper) DeviceGetMemoryInfo() {
-
-}
+// DeviceGetMultiGpuBoard retrieves whether the device is on a Multi-GPU Board.
+func (w wrapper) DeviceGetMultiGpuBoard(device Device) (multiGpu bool, err error) {
+	var multiGpuBool uint = 0
+	err = w.call(w.nvmlDeviceGetMultiGpuBoard, uintptr(device), uintptr(unsafe.Pointer(&multiGpuBool)))
+	if err != nil {
+		return
+	}
 
-func (w wrapper) DeviceGetMinorNumber() {
+	// Non-zero value indicates whether the device is on a multi GPU board
+	multiGpu = false
+	if multiGpuBool != 0 {
+		multiGpu = true
+	}
 
+	return
 }
 
-func (w wrapper) DeviceGetMultiGpuBoard() {
+// DeviceGetName retrieves the name of this device.
+func (w wrapper) DeviceGetName(device Device) (string, error) {
+	buffer := [deviceNameBufferSize]C.char{}
+	if err := w.call(w.nvmlDeviceGetName, uintptr(device), uintptr(unsafe.Pointer(&buffer[0])), deviceNameBufferSize); err != nil {
+		return "", err
+	}
 
+	return C.GoString(&buffer[0]), nil
 }
 
-func (w wrapper) DeviceGetName() {
-
+func (w wrapper) DeviceGetP2PStatus() error {
+	return ErrNotImplemented
 }
-
-func (w wrapper) DeviceGetP2PStatus() {
 
+func (w wrapper) DeviceGetPCIInfo(device Device) (*PCIInfo, error) {
+	return nil, ErrNotImplemented
 }
 
-func (w wrapper) DeviceGetPciInfo() {
-
+// DeviceGetPcieReplayCounter retrieve the PCIe replay counter.
+func (w wrapper) DeviceGetPcieReplayCounter(device Device) (value uint32, err error) {
+	err = w.call(w.nvmlDeviceGetPcieReplayCounter, uintptr(device), uintptr(unsafe.Pointer(&value)))
+	return
 }
-
-func (w wrapper) DeviceGetPcieReplayCounter() {
 
+// DeviceGetPCIeThroughput eetrieve PCIe utilization information.
+// This function is querying a byte counter over a 20ms interval and thus is the PCIe throughput over that interval.
+// This method is not supported in virtual machines running virtual GPU (vGPU).
+func (w wrapper) DeviceGetPCIeThroughput(device Device, counter PCIeUtilCounter) (value uint32, err error) {
+	err = w.call(w.nvmlDeviceGetPcieThroughput, uintptr(device), uintptr(counter), uintptr(unsafe.Pointer(&value)))
+	return
+}
+
+// DeviceGetPerformanceState retrieves the current performance state for the device.
+func (w wrapper) DeviceGetPerformanceState(device Device) (state PState, err error) {
+	err = w.call(w.nvmlDeviceGetPerformanceState, uintptr(device), uintptr(unsafe.Pointer(&state)))
+	return
+}
+
+// DeviceGetPersistenceMode eetrieves the persistence mode associated with this device.
+// When driver persistence mode is enabled the driver software state is not torn down when the last client disconnects.
+// By default this feature is disabled.
+func (w wrapper) DeviceGetPersistenceMode(device Device) (enabled bool, err error) {
+	var state int32 = 0
+	err = w.call(w.nvmlDeviceGetPersistenceMode, uintptr(device), uintptr(unsafe.Pointer(&state)))
+	if err != nil {
+		return
+	}
+
+	if state > 0 {
+		enabled = true
+	} else {
+		enabled = false
+	}
+
+	return
+}
+
+// DeviceGetPowerManagementDefaultLimit retrieves default power management limit on this device, in milliwatts.
+// Default power management limit is a power management limit that the device boots with.
+func (w wrapper) DeviceGetPowerManagementDefaultLimit(device Device) (defaultLimit uint32, err error) {
+	err = w.call(w.nvmlDeviceGetPowerManagementDefaultLimit, uintptr(device), uintptr(unsafe.Pointer(&defaultLimit)))
+	return
 }
 
-func (w wrapper) DeviceGetPcieThroughput() {
-
+// DeviceGetPowerManagementLimit retrieves the power management limit associated with this device.
+// The power limit defines the upper boundary for the card's power draw.
+// If the card's total power draw reaches this limit the power management algorithm kicks in.
+// This reading is only available if power management mode is supported, see DeviceGetPowerManagementMode.
+func (w wrapper) DeviceGetPowerManagementLimit(device Device) (limit uint32, err error) {
+	err = w.call(w.nvmlDeviceGetPowerManagementLimit, uintptr(device), uintptr(unsafe.Pointer(&limit)))
+	return
 }
 
-func (w wrapper) DeviceGetPerformanceState() {
-
+// DeviceGetPowerManagementLimitConstraints retrieves information about possible values of power management limits on this device.
+func (w wrapper) DeviceGetPowerManagementLimitConstraints(device Device) (minLimit, maxLimit uint32, err error) {
+	err = w.call(w.nvmlDeviceGetPowerManagementLimitConstraints, uintptr(device), uintptr(unsafe.Pointer(&minLimit)), uintptr(unsafe.Pointer(&maxLimit)))
+	return
 }
 
-func (w wrapper) DeviceGetPersistenceMode() {
+// DeviceGetPowerManagementMode retrieves the power management mode associated with this device.
+// This API has been deprecated.
+// This flag indicates whether any power management algorithm is currently active on the device.
+// An enabled state does not necessarily mean the device is being actively throttled -- only that that the driver will
+// do so if the appropriate conditions are met.
+func (w wrapper) DeviceGetPowerManagementMode(device Device) (bool, error) {
+	var state int32 = 0
+	if err := w.call(w.nvmlDeviceGetPowerManagementMode, uintptr(device), uintptr(unsafe.Pointer(&state))); err != nil {
+		return false, nil
+	}
 
+	if state > 0 {
+		return true, nil
+	} else {
+		return false, nil
+	}
+}
+
+// DeviceGetPowerState retrieve the current performance state for the device.
+// Deprecated: Use DeviceGetPerformanceState.
+// This function exposes an incorrect generalization.
+func (w wrapper) DeviceGetPowerState(device Device) (state PState, err error) {
+	err = w.call(w.nvmlDeviceGetPowerState, uintptr(device), uintptr(unsafe.Pointer(&state)))
+	return
 }
-
-func (w wrapper) DeviceGetPowerManagementDefaultLimit() {
 
+// DeviceGetPowerUsage retrieves power usage for this GPU in milliwatts and its associated circuitry (e.g. memory)
+func (w wrapper) DeviceGetPowerUsage(device Device) (power uint32, err error) {
+	err = w.call(w.nvmlDeviceGetPowerUsage, uintptr(device), uintptr(unsafe.Pointer(&power)))
+	return
 }
+
+// DeviceGetRetiredPages returns the list of retired pages by source, including pages that are pending retirement.
+// The address information provided from this API is the hardware address of the page that was retired.
+// Note that this does not match the virtual address used in CUDA, but will match the address information in XID 63
+func (w wrapper) DeviceGetRetiredPages(device Device, cause PageRetirementCause) ([]uint64, error) {
+	// Get array size
+	var count uint32 = 0
+	err := w.call(w.nvmlDeviceGetRetiredPages, uintptr(device), uintptr(cause), uintptr(unsafe.Pointer(&count)), 0)
+	if err == nil {
+		return []uint64{}, nil
+	}
 
-func (w wrapper) DeviceGetPowerManagementLimit() {
+	if err != ErrInsufficientSize {
+		return nil, err
+	}
 
-}
+	// Query data
+	list := make([]uint64, count)
+	err = w.call(w.nvmlDeviceGetRetiredPages,
+		uintptr(device),
+		uintptr(cause),
+		uintptr(unsafe.Pointer(&count)),
+		uintptr(unsafe.Pointer(&list[0])))
 
-func (w wrapper) DeviceGetPowerManagementLimitConstraints() {
+	if err != nil {
+		return nil, err
+	}
 
+	return list, nil
 }
 
-func (w wrapper) DeviceGetPowerManagementMode() {
-
-}
+// DeviceGetRetiredPagesPendingStatus checks if any pages are pending retirement and need a reboot to fully retire.
+func (w wrapper) DeviceGetRetiredPagesPendingStatus(device Device) (isPending bool, err error) {
+	var state int32 = 0
+	err = w.call(w.nvmlDeviceGetRetiredPagesPendingStatus, uintptr(device), uintptr(unsafe.Pointer(&state)))
+	if err != nil {
+		return
+	}
 
-func (w wrapper) DeviceGetPowerState() {
+	if state > 0 {
+		isPending = true
+	} else {
+		isPending = false
+	}
 
+	return
 }
 
-func (w wrapper) DeviceGetPowerUsage() {
-
+func (w wrapper) DeviceGetSamples() error {
+	return ErrNotImplemented
 }
 
-func (w wrapper) DeviceGetRetiredPages() {
-
+// DeviceGetSerial retrieves the globally unique board serial number associated with this device's board.
+func (w wrapper) DeviceGetSerial(device Device) (serial string, err error) {
+	buffer := [deviceSerialBufferSize]C.char{}
+	err = w.call(w.nvmlDeviceGetSerial, uintptr(device), uintptr(unsafe.Pointer(&buffer[0])), deviceSerialBufferSize)
+	return
 }
-
-func (w wrapper) DeviceGetRetiredPagesPendingStatus() {
 
+// DeviceGetSupportedClocksThrottleReasons retrieves bitmask of supported clocks throttle reasons that can be
+// returned by DeviceGetCurrentClocksThrottleReasons. This method is not supported in virtual machines
+// running virtual GPU (vGPU).
+func (w wrapper) DeviceGetSupportedClocksThrottleReasons(device Device) (supportedClocksThrottleReasons ClocksThrottleReason, err error) {
+	err = w.call(w.nvmlDeviceGetSupportedClocksThrottleReasons, uintptr(device), uintptr(unsafe.Pointer(&supportedClocksThrottleReasons)))
+	return
 }
 
-func (w wrapper) DeviceGetSamples() {
+// DeviceGetSupportedGraphicsClocks retrieves the list of possible graphics clocks that can be used
+// as an argument for DeviceSetApplicationsClocks.
+func (w wrapper) DeviceGetSupportedGraphicsClocks(device Device, memoryClockMHz uint32) ([]uint32, error) {
+	// Get array size
+	var count uint32 = 0
+	err := w.call(w.nvmlDeviceGetSupportedGraphicsClocks, uintptr(device), uintptr(memoryClockMHz), uintptr(unsafe.Pointer(&count)), 0)
+	if err == nil {
+		return []uint32{}, nil
+	}
 
-}
+	if err != ErrInsufficientSize {
+		return nil, err
+	}
 
-func (w wrapper) DeviceGetSerial() {
+	// Query data
+	list := make([]uint32, count)
+	if err := w.call(w.nvmlDeviceGetSupportedGraphicsClocks, uintptr(device), uintptr(memoryClockMHz), uintptr(unsafe.Pointer(&count)), uintptr(unsafe.Pointer(&list[0]))); err != nil {
+		return nil, err
+	}
 
+	return list, nil
 }
-
-func (w wrapper) DeviceGetSupportedClocksThrottleReasons() {
 
-}
+// DeviceGetSupportedMemoryClocks retrieves the list of possible memory clocks that can be used
+// as an argument for DeviceSetApplicationsClocks.
+func (w wrapper) DeviceGetSupportedMemoryClocks(device Device) ([]uint32, error) {
+	// Get array size
+	var count uint32 = 0
 
-func (w wrapper) DeviceGetSupportedGraphicsClocks() {
+	err := w.call(w.nvmlDeviceGetSupportedMemoryClocks, uintptr(device), uintptr(unsafe.Pointer(&count)), 0)
+	if err == nil {
+		return []uint32{}, nil
+	}
 
-}
+	if err != ErrInsufficientSize {
+		return nil, err
+	}
 
-func (w wrapper) DeviceGetSupportedMemoryClocks() {
+	// Query data
+	list := make([]uint32, count)
+	if err := w.call(w.nvmlDeviceGetSupportedMemoryClocks, uintptr(device), uintptr(unsafe.Pointer(&count)), uintptr(unsafe.Pointer(&list[0]))); err != nil {
+		return nil, err
+	}
 
+	return list, nil
 }
 
-func (w wrapper) DeviceGetTemperature() {
-
+// DeviceGetTemperature retrieves the current temperature readings for the device, in degrees C.
+func (w wrapper) DeviceGetTemperature(device Device, sensorType TemperatureSensor) (temp uint32, err error) {
+	err = w.call(w.nvmlDeviceGetTemperature, uintptr(device), uintptr(sensorType), uintptr(unsafe.Pointer(&temp)))
+	return
 }
 
-func (w wrapper) DeviceGetTemperatureThreshold() {
-
+// DeviceGetTemperatureThreshold retrieves the temperature threshold for the GPU with the specified threshold type in degrees C.
+func (w wrapper) DeviceGetTemperatureThreshold(device Device, thresholdType TemperatureThreshold) (temp uint32, err error) {
+	err = w.call(w.nvmlDeviceGetTemperatureThreshold, uintptr(device), uintptr(thresholdType), uintptr(unsafe.Pointer(&temp)))
+	return
 }
-
-func (w wrapper) DeviceGetTopologyCommonAncestor() {
 
+// DeviceGetTopologyCommonAncestor retrieves the common ancestor for two devices. Supported on Linux only.
+func (w wrapper) DeviceGetTopologyCommonAncestor(device1 Device, device2 Device) (pathInfo GPUTopologyLevel, err error) {
+	err = w.call(w.nvmlDeviceGetTopologyCommonAncestor, uintptr(device1), uintptr(device2), uintptr(unsafe.Pointer(&pathInfo)))
+	return
 }
 
-func (w wrapper) DeviceGetTopologyNearestGpus() {
-
+func (w wrapper) DeviceGetTopologyNearestGpus() error {
+	return ErrNotImplemented
 }
 
-func (w wrapper) DeviceGetTotalEccErrors() {
-
+// DeviceGetTotalECCErrors retrieves the total ECC error counts for the device.
+// Only applicable to devices with ECC. Requires NVML_INFOROM_ECC version 1.0 or higher. Requires ECC Mode to be enabled.
+// The total error count is the sum of errors across each of the separate memory systems, i.e. the total set of errors across the entire device.
+func (w wrapper) DeviceGetTotalECCErrors(device Device, errorType MemoryErrorType, counterType ECCCounterType) (eccCount uint64, err error) {
+	err = w.call(w.nvmlDeviceGetTotalEccErrors, uintptr(device), uintptr(errorType), uintptr(counterType), uintptr(unsafe.Pointer(&eccCount)))
+	return
 }
-
-func (w wrapper) DeviceGetTotalEnergyConsumption() {
 
+// DeviceGetTotalEnergyConsumption retrieves total energy consumption for this GPU in millijoules (mJ)
+// since the driver was last reloaded.
+func (w wrapper) DeviceGetTotalEnergyConsumption(device Device) (energy uint64, err error) {
+	err = w.call(w.nvmlDeviceGetTotalEnergyConsumption, uintptr(device), uintptr(unsafe.Pointer(&energy)))
+	return
 }
 
-func (w wrapper) DeviceGetUUID() {
+// DeviceGetUUID retrieves the globally unique immutable UUID associated with this device,
+// as a 5 part hexadecimal string, that augments the immutable, board serial identifier.
+func (w wrapper) DeviceGetUUID(device Device) (string, error) {
+	buffer := [deviceUUIDBufferSize]C.char{}
+	if err := w.call(w.nvmlDeviceGetUUID, uintptr(device), uintptr(unsafe.Pointer(&buffer[0])), deviceUUIDBufferSize); err != nil {
+		return "", err
+	}
 
+	return C.GoString(&buffer[0]), nil
 }
 
-func (w wrapper) DeviceGetUtilizationRates() {
-
+// DeviceGetUtilizationRates retrieves the current utilization rates for the device's major subsystems.
+func (w wrapper) DeviceGetUtilizationRates(device Device) (u Utilization, err error) {
+	u.GPU = 0
+	u.Memory = 0
+	err = w.call(w.nvmlDeviceGetUtilizationRates, uintptr(device), uintptr(unsafe.Pointer(&u)))
+	return
 }
 
-func (w wrapper) DeviceGetVbiosVersion() {
+// DeviceGetVbiosVersion gets VBIOS version of the device. The VBIOS version may change from time to time.
+func (w wrapper) DeviceGetVbiosVersion(device Device) (string, error) {
+	buffer := [deviceVBIOSVersionBufferSize]C.char{}
+	if err := w.call(w.nvmlDeviceGetVbiosVersion, uintptr(device), uintptr(unsafe.Pointer(&buffer[0])), deviceVBIOSVersionBufferSize); err != nil {
+		return "", err
+	}
 
+	return C.GoString(&buffer[0]), nil
 }
 
-func (w wrapper) DeviceGetViolationStatus() {
-
+// DeviceGetViolationStatus gets the duration of time during which the device was throttled (lower than requested
+// clocks) due to power or thermal constraints.
+// The method is important to users who are tying to understand if their GPUs throttle at any point during their
+// applications. The difference in violation times at two different reference times gives the indication of
+// GPU throttling event.
+func (w wrapper) DeviceGetViolationStatus(device Device, policyType PerfPolicyType) (violTime ViolationTime, err error) {
+	err = w.call(w.nvmlDeviceGetViolationStatus, uintptr(device), uintptr(policyType), uintptr(unsafe.Pointer(&violTime)))
+	return
 }
-
-func (w wrapper) DeviceOnSameBoard() {
 
-}
+// DeviceOnSameBoard checks if the GPU devices are on the same physical board.
+func (w wrapper) DeviceOnSameBoard(device1 Device, device2 Device) (bool, error) {
+	var onSameBoard int32 = 0
 
-func (w wrapper) DeviceResetApplicationsClocks() {
+	if err := w.call(w.nvmlDeviceOnSameBoard, uintptr(device1), uintptr(device2), uintptr(unsafe.Pointer(&onSameBoard))); err != nil {
+		return false, err
+	}
 
+	if onSameBoard == 0 {
+		return false, nil
+	} else {
+		return true, nil
+	}
 }
-
-func (w wrapper) DeviceSetAutoBoostedClocksEnabled() {
 
+// DeviceResetApplicationsClocks resets the application clock to the default value.
+func (w wrapper) DeviceResetApplicationsClocks(device Device) error {
+	return w.call(w.nvmlDeviceResetApplicationsClocks, uintptr(device))
 }
 
-func (w wrapper) DeviceSetCpuAffinity() {
+// DeviceSetAutoBoostedClocksEnabled tries to set the current state of Auto Boosted clocks on a device.
+// Auto Boosted clocks are enabled by default on some hardware, allowing the GPU to run at higher clock rates to
+// maximize performance as thermal limits allow. Auto Boosted clocks should be disabled if fixed clock rates are desired.
+// Non-root users may use this API by default but can be restricted by root from using this API by calling
+// DeviceSetAPIRestriction with apiType=NVML_RESTRICTED_API_SET_AUTO_BOOSTED_CLOCKS.
+// Note: Persistence Mode is required to modify current Auto Boost settings, therefore, it must be enabled.
+func (w wrapper) DeviceSetAutoBoostedClocksEnabled(device Device, enabled bool) error {
+	var state int32 = 0
+	if enabled {
+		state = 1
+	}
 
+	return w.call(w.nvmlDeviceSetAutoBoostedClocksEnabled, uintptr(device), uintptr(state))
 }
 
-func (w wrapper) DeviceSetDefaultAutoBoostedClocksEnabled() {
-
+// DeviceSetCpuAffinity sets the ideal affinity for the calling thread and device using the guidelines given in
+// DeviceGetCPUAffinity(). Note, this is a change as of version 8.0. Older versions set the affinity for a calling
+// process and all children. Currently supports up to 64 processors.
+func (w wrapper) DeviceSetCpuAffinity(device Device) error {
+	return w.call(w.nvmlDeviceSetCpuAffinity, uintptr(device))
 }
 
-func (w wrapper) DeviceValidateInforom() {
+// DeviceSetDefaultAutoBoostedClocksEnabled tries to set the default state of Auto Boosted clocks on a device.
+// This is the default state that Auto Boosted clocks will return to when no compute running processes (e.g. CUDA
+// application which have an active context) are running.
+func (w wrapper) DeviceSetDefaultAutoBoostedClocksEnabled(device Device, enabled bool) error {
+	var state int32 = 0
+	if enabled {
+		state = 1
+	}
 
+	return w.call(w.nvmlDeviceSetDefaultAutoBoostedClocksEnabled, uintptr(device), uintptr(state), 0)
 }
-
-func (w wrapper) SystemGetTopologyGpuSetfunc() {
 
+// DeviceValidateInforom reads the infoROM from the flash and verifies the checksums.
+func (w wrapper) DeviceValidateInforom(device Device) (err error) {
+	err = w.call(w.nvmlDeviceValidateInforom, uintptr(device))
+	return
 }

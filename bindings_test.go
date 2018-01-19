@@ -27,12 +27,15 @@ func TestErrorString(t *testing.T) {
 	require.Equal(t, "Not Supported", w.ErrorString(3))
 }
 
-func create(t *testing.T) *wrapper {
+func create(t *testing.T) (*wrapper, Device) {
 	w, err := New("")
 	require.NoError(t, err)
 
 	err = w.Init()
 	require.NoError(t, err)
 
-	return w
+	device, err := w.DeviceGetHandleByIndex(0)
+	require.NoError(t, err)
+
+	return w, device
 }
