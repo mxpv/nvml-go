@@ -28,7 +28,7 @@ var (
 	ErrInUse                = errors.New("An operation cannot be performed because the GPU is currently in use")
 	ErrMemory               = errors.New("Insufficient memory")
 	ErrNoData               = errors.New("No data")
-	ErrVGPUECCNotSupported  = errors.New("The requested vgpu operation is not available on target device, becasue ECC is enabled")
+	ErrVGPUECCNotSupported  = errors.New("The requested vgpu operation is not available on target device, because ECC is enabled")
 	ErrUnknown              = errors.New("An internal driver error occurred")
 )
 

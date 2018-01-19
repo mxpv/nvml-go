@@ -2,6 +2,7 @@ package nvml
 
 import "math"
 
+// Device represents native NVML device handle.
 type Device uintptr
 
 const (
@@ -13,14 +14,14 @@ const (
 	deviceInfoROMVersionBufferSize = 16
 )
 
-// Memory allocation information for a device.
+// Memory holds allocation information for a device.
 type Memory struct {
 	Total uint64 // Total installed FB memory (in bytes).
 	Free  uint64 // Unallocated FB memory (in bytes).
 	Used  uint64 // Allocated FB memory (in bytes).
 }
 
-// BAR1 Memory allocation Information for a device.
+// BAR1Memory holds BAR1 memory allocation information for a device.
 type BAR1Memory struct {
 	Total uint64 // Total BAR1 Memory (in bytes)
 	Free  uint64 // Unallocated BAR1 Memory (in bytes)
@@ -61,7 +62,7 @@ const (
 	ClockVideo    = ClockType(3) // Video encoder/decoder clock domain
 )
 
-// Information about running compute processes on the GPU
+// ProcessInfo holds information about running compute processes on the GPU.
 type ProcessInfo struct {
 	// Process ID
 	PID uint32
@@ -165,7 +166,7 @@ const (
 	ClocksThrottleReasonHwPowerBrakeSlowdown = ClocksThrottleReason(0x0000000000000080)
 )
 
-// GPU Operation Mode.
+// GPUOperationMode represents GPU Operation Mode.
 // GOM allows to reduce power usage and optimize GPU throughput by disabling GPU features.
 // Each GOM is designed to meet specific user needs.
 type GPUOperationMode int32
@@ -180,6 +181,7 @@ const (
 	GPUOperationModeLowDoublePrecision = GPUOperationMode(2)
 )
 
+// PCIInfo represents PCI information about a GPU device.
 type PCIInfo struct {
 	BusID string
 	// The legacy tuple domain:bus:device.function PCI identifier
@@ -312,7 +314,7 @@ const (
 	PCIeUtilRXBytes = PCIeUtilCounter(1)
 )
 
-// Allowed PStates.
+// PState represents allowed PStates.
 type PState int32
 
 //noinspection GoUnusedConst
@@ -393,7 +395,7 @@ const (
 	PerfPolicyTotalBaseClocks = PerfPolicyType(11)
 )
 
-// Struct to hold perf policy violation status data.
+// ViolationTime holds perf policy violation status data.
 type ViolationTime struct {
 	ReferenceTime uint64 // ReferenceTime represents CPU timestamp in microseconds
 	ViolationTime uint64 // ViolationTime in Nanoseconds

@@ -19,16 +19,16 @@ func (w wrapper) DeviceClearCpuAffinity(device Device) (err error) {
 // If an API is restricted only root users can call that API.
 // See nvmlDeviceSetAPIRestriction to change current permissions.
 func (w wrapper) DeviceGetAPIRestriction(device Device, apiType RestrictedAPI) (bool, error) {
-	var state int32 = 0
+	var state int32
 	if err := w.call(w.nvmlDeviceGetAPIRestriction, uintptr(device), uintptr(apiType), uintptr(unsafe.Pointer(&state))); err != nil {
 		return false, err
 	}
 
 	if state > 0 {
 		return true, nil
-	} else {
-		return false, nil
 	}
+
+	return false, nil
 }
 
 // DeviceGetApplicationsClock retrieves the current setting of a clock that applications will use unless an overspec
@@ -43,8 +43,8 @@ func (w wrapper) DeviceGetApplicationsClock(device Device, clockType ClockType) 
 // maximize performance as thermal limits allow.
 // On Pascal and newer hardware, Auto Aoosted clocks are controlled through application clocks.
 func (w wrapper) DeviceGetAutoBoostedClocksEnabled(device Device) (isEnabled, defaultIsEnabled bool, err error) {
-	var isEnabledInt int32 = 0
-	var defaultIsEnabledInt int32 = 0
+	var isEnabledInt int32
+	var defaultIsEnabledInt int32
 
 	err = w.call(w.nvmlDeviceGetAutoBoostedClocksEnabled, uintptr(device), uintptr(unsafe.Pointer(&isEnabledInt)), uintptr(unsafe.Pointer(&defaultIsEnabledInt)))
 	if err != nil {
@@ -131,7 +131,7 @@ func (w wrapper) DeviceGetComputeMode(device Device) (mode ComputeMode, err erro
 // Keep in mind that information returned by this call is dynamic and the number of elements might change in time.
 // Allocate more space for infos table in case new compute processes are spawned.
 func (w wrapper) DeviceGetComputeRunningProcesses(device Device) ([]ProcessInfo, error) {
-	var infoCount uint32 = 0
+	var infoCount uint32
 
 	// Query the current number of running compute processes
 	err := w.call(w.nvmlDeviceGetComputeRunningProcesses, uintptr(device), uintptr(unsafe.Pointer(&infoCount)), 0)
@@ -231,31 +231,31 @@ func (w wrapper) DeviceGetDetailedECCErrors(device Device, errorType MemoryError
 // For example whether X Server is attached to this device and has allocated memory for the screen.
 // Display can be active even when no monitor is physically attached.
 func (w wrapper) DeviceGetDisplayActive(device Device) (bool, error) {
-	var state int32 = 0
+	var state int32
 	if err := w.call(w.nvmlDeviceGetDisplayActive, uintptr(device), uintptr(unsafe.Pointer(&state))); err != nil {
 		return false, err
 	}
 
 	if state > 0 {
 		return true, nil
-	} else {
-		return false, nil
 	}
+
+	return false, nil
 }
 
 // DeviceGetDisplayMode retrieves the display mode for the device. This method indicates whether a physical display
 // (e.g. monitor) is currently connected to any of the device's connectors.
 func (w wrapper) DeviceGetDisplayMode(device Device) (bool, error) {
-	var state int32 = 0
+	var state int32
 	if err := w.call(w.nvmlDeviceGetDisplayMode, uintptr(device), uintptr(unsafe.Pointer(&state))); err != nil {
 		return false, err
 	}
 
 	if state > 0 {
 		return true, nil
-	} else {
-		return false, nil
 	}
+
+	return false, nil
 }
 
 // DeviceGetDriverModel retrieves the current and pending driver model for the device.
@@ -270,8 +270,8 @@ func (w wrapper) DeviceGetDriverModel(device Device) (current, pending DriverMod
 // Only applicable to devices with ECC. Requires NVML_INFOROM_ECC version 1.0 or higher.
 // Changing ECC modes requires a reboot. The "pending" ECC mode refers to the target mode following the next reboot.
 func (w wrapper) DeviceGetECCMode(device Device) (current, pending bool, err error) {
-	var currentInt int32 = 0
-	var pendingInt int32 = 0
+	var currentInt int32
+	var pendingInt int32
 
 	err = w.call(w.nvmlDeviceGetEccMode, uintptr(device), uintptr(unsafe.Pointer(&currentInt)), uintptr(unsafe.Pointer(&pendingInt)))
 	if err != nil {
@@ -351,7 +351,7 @@ func (w wrapper) DeviceGetGPUOperationMode(device Device) (current, pending GPUO
 // Keep in mind that information returned by this call is dynamic and the number of elements might change in time.
 // Allocate more space for infos table in case new graphics processes are spawned.
 func (w wrapper) DeviceGetGraphicsRunningProcesses(device Device) ([]ProcessInfo, error) {
-	var infoCount uint32 = 0
+	var infoCount uint32
 
 	// Query the current number of running compute processes
 	err := w.call(w.nvmlDeviceGetGraphicsRunningProcesses, uintptr(device), uintptr(unsafe.Pointer(&infoCount)), 0)
@@ -507,7 +507,7 @@ func (w wrapper) DeviceGetMinorNumber(device Device) (minorNumber uint32, err er
 
 // DeviceGetMultiGpuBoard retrieves whether the device is on a Multi-GPU Board.
 func (w wrapper) DeviceGetMultiGpuBoard(device Device) (multiGpu bool, err error) {
-	var multiGpuBool uint = 0
+	var multiGpuBool uint
 	err = w.call(w.nvmlDeviceGetMultiGpuBoard, uintptr(device), uintptr(unsafe.Pointer(&multiGpuBool)))
 	if err != nil {
 		return
@@ -564,7 +564,7 @@ func (w wrapper) DeviceGetPerformanceState(device Device) (state PState, err err
 // When driver persistence mode is enabled the driver software state is not torn down when the last client disconnects.
 // By default this feature is disabled.
 func (w wrapper) DeviceGetPersistenceMode(device Device) (enabled bool, err error) {
-	var state int32 = 0
+	var state int32
 	err = w.call(w.nvmlDeviceGetPersistenceMode, uintptr(device), uintptr(unsafe.Pointer(&state)))
 	if err != nil {
 		return
@@ -607,16 +607,16 @@ func (w wrapper) DeviceGetPowerManagementLimitConstraints(device Device) (minLim
 // An enabled state does not necessarily mean the device is being actively throttled -- only that that the driver will
 // do so if the appropriate conditions are met.
 func (w wrapper) DeviceGetPowerManagementMode(device Device) (bool, error) {
-	var state int32 = 0
+	var state int32
 	if err := w.call(w.nvmlDeviceGetPowerManagementMode, uintptr(device), uintptr(unsafe.Pointer(&state))); err != nil {
 		return false, nil
 	}
 
 	if state > 0 {
 		return true, nil
-	} else {
-		return false, nil
 	}
+
+	return false, nil
 }
 
 // DeviceGetPowerState retrieve the current performance state for the device.
@@ -638,7 +638,7 @@ func (w wrapper) DeviceGetPowerUsage(device Device) (power uint32, err error) {
 // Note that this does not match the virtual address used in CUDA, but will match the address information in XID 63
 func (w wrapper) DeviceGetRetiredPages(device Device, cause PageRetirementCause) ([]uint64, error) {
 	// Get array size
-	var count uint32 = 0
+	var count uint32
 	err := w.call(w.nvmlDeviceGetRetiredPages, uintptr(device), uintptr(cause), uintptr(unsafe.Pointer(&count)), 0)
 	if err == nil {
 		return []uint64{}, nil
@@ -703,7 +703,7 @@ func (w wrapper) DeviceGetSupportedClocksThrottleReasons(device Device) (support
 // as an argument for DeviceSetApplicationsClocks.
 func (w wrapper) DeviceGetSupportedGraphicsClocks(device Device, memoryClockMHz uint32) ([]uint32, error) {
 	// Get array size
-	var count uint32 = 0
+	var count uint32
 	err := w.call(w.nvmlDeviceGetSupportedGraphicsClocks, uintptr(device), uintptr(memoryClockMHz), uintptr(unsafe.Pointer(&count)), 0)
 	if err == nil {
 		return []uint32{}, nil
@@ -726,7 +726,7 @@ func (w wrapper) DeviceGetSupportedGraphicsClocks(device Device, memoryClockMHz 
 // as an argument for DeviceSetApplicationsClocks.
 func (w wrapper) DeviceGetSupportedMemoryClocks(device Device) ([]uint32, error) {
 	// Get array size
-	var count uint32 = 0
+	var count uint32
 
 	err := w.call(w.nvmlDeviceGetSupportedMemoryClocks, uintptr(device), uintptr(unsafe.Pointer(&count)), 0)
 	if err == nil {
@@ -832,9 +832,9 @@ func (w wrapper) DeviceOnSameBoard(device1 Device, device2 Device) (bool, error)
 
 	if onSameBoard == 0 {
 		return false, nil
-	} else {
-		return true, nil
 	}
+
+	return true, nil
 }
 
 // DeviceResetApplicationsClocks resets the application clock to the default value.
