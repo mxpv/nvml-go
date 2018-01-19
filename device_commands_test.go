@@ -3,7 +3,7 @@ package nvml
 import (
 	"testing"
 
-	"github.com/json-iterator/go/require"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDeviceClearECCErrorCounts(t *testing.T) {

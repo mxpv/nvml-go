@@ -110,6 +110,7 @@ type wrapper struct {
 	nvmlDeviceSetDefaultAutoBoostedClocksEnabled,
 	nvmlDeviceValidateInforom,
 	nvmlSystemGetTopologyGpuSet,
+	// Device commands
 	nvmlDeviceClearEccErrorCounts,
 	nvmlDeviceSetAPIRestriction,
 	nvmlDeviceSetApplicationsClocks,
