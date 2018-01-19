@@ -109,7 +109,16 @@ type wrapper struct {
 	nvmlDeviceSetCpuAffinity,
 	nvmlDeviceSetDefaultAutoBoostedClocksEnabled,
 	nvmlDeviceValidateInforom,
-	nvmlSystemGetTopologyGpuSet *syscall.Proc
+	nvmlSystemGetTopologyGpuSet,
+	nvmlDeviceClearEccErrorCounts,
+	nvmlDeviceSetAPIRestriction,
+	nvmlDeviceSetApplicationsClocks,
+	nvmlDeviceSetComputeMode,
+	nvmlDeviceSetDriverModel,
+	nvmlDeviceSetEccMode,
+	nvmlDeviceSetGpuOperationMode,
+	nvmlDeviceSetPersistenceMode,
+	nvmlDeviceSetPowerManagementLimit *syscall.Proc
 }
 
 func (w wrapper) call(p *syscall.Proc, a ...uintptr) error {
@@ -248,6 +257,15 @@ func New(path string) (*wrapper, error) {
 		nvmlDeviceSetDefaultAutoBoostedClocksEnabled: dll.MustFindProc("nvmlDeviceSetDefaultAutoBoostedClocksEnabled"),
 		nvmlDeviceValidateInforom:                    dll.MustFindProc("nvmlDeviceValidateInforom"),
 		nvmlSystemGetTopologyGpuSet:                  dll.MustFindProc("nvmlSystemGetTopologyGpuSet"),
+		nvmlDeviceClearEccErrorCounts:                dll.MustFindProc("nvmlDeviceClearEccErrorCounts"),
+		nvmlDeviceSetAPIRestriction:                  dll.MustFindProc("nvmlDeviceSetAPIRestriction"),
+		nvmlDeviceSetApplicationsClocks:              dll.MustFindProc("nvmlDeviceSetApplicationsClocks"),
+		nvmlDeviceSetComputeMode:                     dll.MustFindProc("nvmlDeviceSetComputeMode"),
+		nvmlDeviceSetDriverModel:                     dll.MustFindProc("nvmlDeviceSetDriverModel"),
+		nvmlDeviceSetEccMode:                         dll.MustFindProc("nvmlDeviceSetEccMode"),
+		nvmlDeviceSetGpuOperationMode:                dll.MustFindProc("nvmlDeviceSetGpuOperationMode"),
+		nvmlDeviceSetPersistenceMode:                 dll.MustFindProc("nvmlDeviceSetPersistenceMode"),
+		nvmlDeviceSetPowerManagementLimit:            dll.MustFindProc("nvmlDeviceSetPowerManagementLimit"),
 	}
 
 	return bindings, nil
