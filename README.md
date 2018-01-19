@@ -72,3 +72,9 @@ func ExampleNew() {
 	}
 }
 ```
+
+
+## TODO ##
+- [Unit Queries](http://docs.nvidia.com/deploy/nvml-api/group__nvmlUnitQueries.html)
+- [Unit Commands](http://docs.nvidia.com/deploy/nvml-api/group__nvmlDeviceCommands.html)
+- Linux support
