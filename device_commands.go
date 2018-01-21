@@ -6,8 +6,8 @@ package nvml
 // Requires root/admin permissions. Requires ECC Mode to be enabled.
 // Sets all of the specified ECC counters to 0, including both detailed and total counts.
 // This operation takes effect immediately.
-func (w wrapper) DeviceClearECCErrorCounts(device Device, counterType ECCCounterType) error {
-	return w.call(w.nvmlDeviceClearEccErrorCounts, uintptr(device), uintptr(counterType))
+func (a API) DeviceClearECCErrorCounts(device Device, counterType ECCCounterType) error {
+	return a.call(a.nvmlDeviceClearEccErrorCounts, uintptr(device), uintptr(counterType))
 }
 
 // DeviceSetAPIRestriction changes the root/admin restructions on certain APIs.
@@ -15,13 +15,13 @@ func (w wrapper) DeviceClearECCErrorCounts(device Device, counterType ECCCounter
 // This method can be used by a root/admin user to give non-root/admin access to certain otherwise-restricted APIs.
 // The new setting lasts for the lifetime of the NVIDIA driver; it is not persistent.
 // See DeviceGetAPIRestriction to query the current restriction settings.
-func (w wrapper) DeviceSetAPIRestriction(device Device, apiType RestrictedAPI, isRestricted bool) error {
+func (a API) DeviceSetAPIRestriction(device Device, apiType RestrictedAPI, isRestricted bool) error {
 	var isRestrictedInt int32 = 0
 	if isRestricted {
 		isRestrictedInt = 1
 	}
 
-	return w.call(w.nvmlDeviceSetAPIRestriction, uintptr(device), uintptr(apiType), uintptr(isRestrictedInt))
+	return a.call(a.nvmlDeviceSetAPIRestriction, uintptr(device), uintptr(apiType), uintptr(isRestrictedInt))
 }
 
 // DeviceSetApplicationsClocks set clocks that applications will lock to.
@@ -33,8 +33,8 @@ func (w wrapper) DeviceSetAPIRestriction(device Device, apiType RestrictedAPI, i
 // On K80 and newer Kepler and Maxwell GPUs, users desiring fixed performance should also call
 // DeviceSetAutoBoostedClocksEnabled to prevent clocks from automatically boosting above the clock value being set.
 // After system reboot or driver reload applications clocks go back to their default value.
-func (w wrapper) DeviceSetApplicationsClocks(device Device, memClockMHz, graphicsClockMHz uint32) error {
-	return w.call(w.nvmlDeviceSetApplicationsClocks, uintptr(device), uintptr(memClockMHz), uintptr(graphicsClockMHz))
+func (a API) DeviceSetApplicationsClocks(device Device, memClockMHz, graphicsClockMHz uint32) error {
+	return a.call(a.nvmlDeviceSetApplicationsClocks, uintptr(device), uintptr(memClockMHz), uintptr(graphicsClockMHz))
 }
 
 // DeviceSetComputeMode sets the compute mode for the device.
@@ -43,8 +43,8 @@ func (w wrapper) DeviceSetApplicationsClocks(device Device, memClockMHz, graphic
 // This operation takes effect immediately.
 // Under Linux it is not persistent across reboots and always resets to "Default". Under windows it is persistent.
 // Under windows compute mode may only be set to DEFAULT when running in WDDM.
-func (w wrapper) DeviceSetComputeMode(device Device, mode ComputeMode) error {
-	return w.call(w.nvmlDeviceSetComputeMode, uintptr(device), uintptr(mode))
+func (a API) DeviceSetComputeMode(device Device, mode ComputeMode) error {
+	return a.call(a.nvmlDeviceSetComputeMode, uintptr(device), uintptr(mode))
 }
 
 // DeviceSetDriverModel sets the driver model for the device.
@@ -57,8 +57,8 @@ func (w wrapper) DeviceSetComputeMode(device Device, mode ComputeMode) error {
 // This operation takes effect after the next reboot.
 // Windows driver model may only be set to WDDM when running in DEFAULT compute mode. Change driver model to WDDM is not
 // supported when GPU doesn't support graphics acceleration or will not support it after reboot.
-func (w wrapper) DeviceSetDriverModel(device Device, model DriverModel, flags uint32) error {
-	return w.call(w.nvmlDeviceSetDriverModel, uintptr(device), uintptr(model), uintptr(flags))
+func (a API) DeviceSetDriverModel(device Device, model DriverModel, flags uint32) error {
+	return a.call(a.nvmlDeviceSetDriverModel, uintptr(device), uintptr(model), uintptr(flags))
 }
 
 // DeviceSetECCMode sets the ECC mode for the device.
@@ -66,13 +66,13 @@ func (w wrapper) DeviceSetDriverModel(device Device, model DriverModel, flags ui
 // Requires root/admin permissions.
 // The ECC mode determines whether the GPU enables its ECC support.
 // This operation takes effect after the next reboot.
-func (w wrapper) DeviceSetECCMode(device Device, ecc bool) error {
+func (a API) DeviceSetECCMode(device Device, ecc bool) error {
 	var eccInt int32 = 0
 	if ecc {
 		eccInt = 1
 	}
 
-	return w.call(w.nvmlDeviceSetEccMode, uintptr(device), uintptr(eccInt))
+	return a.call(a.nvmlDeviceSetEccMode, uintptr(device), uintptr(eccInt))
 }
 
 // DeviceSetGPUOperationMode sets new GOM. See nvmlGpuOperationMode_t for details.
@@ -83,8 +83,8 @@ func (w wrapper) DeviceSetECCMode(device Device, ecc bool) error {
 // Changing GOMs requires a reboot. The reboot requirement might be removed in the future.
 // Compute only GOMs don't support graphics acceleration.
 // Under windows switching to these GOMs when pending driver model is WDDM is not supported.
-func (w wrapper) DeviceSetGPUOperationMode(device Device, mode GPUOperationMode) error {
-	return w.call(w.nvmlDeviceSetGpuOperationMode, uintptr(device), uintptr(mode))
+func (a API) DeviceSetGPUOperationMode(device Device, mode GPUOperationMode) error {
+	return a.call(a.nvmlDeviceSetGpuOperationMode, uintptr(device), uintptr(mode))
 }
 
 // DeviceSetPersistenceMode sets the persistence mode for the device.
@@ -92,19 +92,19 @@ func (w wrapper) DeviceSetGPUOperationMode(device Device, mode GPUOperationMode)
 // The persistence mode determines whether the GPU driver software is torn down after the last client exits.
 // This operation takes effect immediately. It is not persistent across reboots.
 // After each reboot the persistence mode is reset to "Disabled".
-func (w wrapper) DeviceSetPersistenceMode(device Device, mode bool) error {
+func (a API) DeviceSetPersistenceMode(device Device, mode bool) error {
 	var modeInt int32 = 0
 	if mode {
 		modeInt = 1
 	}
 
-	return w.call(w.nvmlDeviceSetPersistenceMode, uintptr(device), uintptr(modeInt))
+	return a.call(a.nvmlDeviceSetPersistenceMode, uintptr(device), uintptr(modeInt))
 }
 
 // DeviceSetPowerManagementLimit set new power limit of this device.
 // Requires root/admin permissions.
 // Note: Limit is not persistent across reboots or driver unloads.
 // Enable persistent mode to prevent driver from unloading when no application is using the device.
-func (w wrapper) DeviceSetPowerManagementLimit(device Device, limit uint32) error {
-	return w.call(w.nvmlDeviceSetPowerManagementLimit, uintptr(device), uintptr(limit))
+func (a API) DeviceSetPowerManagementLimit(device Device, limit uint32) error {
+	return a.call(a.nvmlDeviceSetPowerManagementLimit, uintptr(device), uintptr(limit))
 }

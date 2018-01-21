@@ -7,15 +7,15 @@ import (
 
 // SystemGetCudaDriverVersion retrieves the version of the CUDA driver.
 // The returned CUDA driver version is the same as the CUDA API cuDriverGetVersion() would return on the system.
-func (w wrapper) SystemGetCudaDriverVersion() (cudaDriverVersion int32, err error) {
-	err = w.call(w.nvmlSystemGetCudaDriverVersion, uintptr(unsafe.Pointer(&cudaDriverVersion)))
+func (a API) SystemGetCudaDriverVersion() (cudaDriverVersion int32, err error) {
+	err = a.call(a.nvmlSystemGetCudaDriverVersion, uintptr(unsafe.Pointer(&cudaDriverVersion)))
 	return
 }
 
 // SystemGetDriverVersion retrieves the version of the system's graphics driver.
-func (w wrapper) SystemGetDriverVersion() (string, error) {
+func (a API) SystemGetDriverVersion() (string, error) {
 	buffer := [systemDriverVersionBufferSize]C.char{}
-	if err := w.call(w.nvmlSystemGetDriverVersion, uintptr(unsafe.Pointer(&buffer[0])), systemDriverVersionBufferSize); err != nil {
+	if err := a.call(a.nvmlSystemGetDriverVersion, uintptr(unsafe.Pointer(&buffer[0])), systemDriverVersionBufferSize); err != nil {
 		return "", err
 	}
 
@@ -23,9 +23,9 @@ func (w wrapper) SystemGetDriverVersion() (string, error) {
 }
 
 // SystemGetNVMLVersion retrieves the version of the NVML library.
-func (w wrapper) SystemGetNVMLVersion() (string, error) {
+func (a API) SystemGetNVMLVersion() (string, error) {
 	buffer := [systemDriverVersionBufferSize]C.char{}
-	if err := w.call(w.nvmlSystemGetNVMLVersion, uintptr(unsafe.Pointer(&buffer[0])), systemDriverVersionBufferSize); err != nil {
+	if err := a.call(a.nvmlSystemGetNVMLVersion, uintptr(unsafe.Pointer(&buffer[0])), systemDriverVersionBufferSize); err != nil {
 		return "", err
 	}
 
@@ -33,11 +33,11 @@ func (w wrapper) SystemGetNVMLVersion() (string, error) {
 }
 
 // SystemGetProcessName gets name of the process with provided process id
-func (w wrapper) SystemGetProcessName(pid uint) (string, error) {
+func (a API) SystemGetProcessName(pid uint) (string, error) {
 	const maxLength = 256
 
 	buffer := [maxLength]C.char{}
-	if err := w.call(w.nvmlSystemGetProcessName, uintptr(pid), uintptr(unsafe.Pointer(&buffer[0])), maxLength); err != nil {
+	if err := a.call(a.nvmlSystemGetProcessName, uintptr(pid), uintptr(unsafe.Pointer(&buffer[0])), maxLength); err != nil {
 		return "", err
 	}
 

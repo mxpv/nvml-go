@@ -10,7 +10,7 @@ import (
 
 var ErrNotImplemented = errors.New("Not implemented")
 
-type wrapper struct {
+type API struct {
 	dll *syscall.DLL
 	// Initialization and cleanup
 	nvmlInit,
@@ -122,8 +122,8 @@ type wrapper struct {
 	nvmlDeviceSetPowerManagementLimit *syscall.Proc
 }
 
-func (w wrapper) call(p *syscall.Proc, a ...uintptr) error {
-	ret, _, _ := p.Call(a...)
+func (a API) call(p *syscall.Proc, args ...uintptr) error {
+	ret, _, _ := p.Call(args...)
 	if ret != 0 {
 		return returnValueToError(int(ret))
 	}
@@ -132,27 +132,27 @@ func (w wrapper) call(p *syscall.Proc, a ...uintptr) error {
 }
 
 // Init initializes NVML, but don't initialize any GPUs yet.
-func (w wrapper) Init() error {
-	return w.call(w.nvmlInit)
+func (a API) Init() error {
+	return a.call(a.nvmlInit)
 }
 
 // Shutdown shut downs NVML by releasing all GPU resources previously allocated with Init() and
 // unloads nvml.dll via UnloadLibrary call.
-func (w wrapper) Shutdown() error {
-	err := w.call(w.nvmlShutdown)
-	w.dll.Release()
+func (a API) Shutdown() error {
+	err := a.call(a.nvmlShutdown)
+	a.dll.Release()
 	return err
 }
 
 // ErrorString returns a string representation of the error.
-func (w wrapper) ErrorString(result uintptr) string {
-	ret, _, _ := w.nvmlErrorString.Call(uintptr(result))
+func (a API) ErrorString(result uintptr) string {
+	ret, _, _ := a.nvmlErrorString.Call(uintptr(result))
 	buf := (*C.char)(unsafe.Pointer(ret))
 	return C.GoString(buf)
 }
 
 // New creates nvml.dll wrapper
-func New(path string) (*wrapper, error) {
+func New(path string) (*API, error) {
 	if path == "" {
 		path = "C:\\Program Files\\NVIDIA Corporation\\NVSMI\\nvml.dll"
 	}
@@ -162,7 +162,7 @@ func New(path string) (*wrapper, error) {
 		return nil, err
 	}
 
-	bindings := &wrapper{
+	bindings := &API{
 		dll:                                          dll,
 		nvmlInit:                                     dll.MustFindProc("nvmlInit"),
 		nvmlShutdown:                                 dll.MustFindProc("nvmlShutdown"),

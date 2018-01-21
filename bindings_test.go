@@ -27,7 +27,7 @@ func TestErrorString(t *testing.T) {
 	require.Equal(t, "Not Supported", w.ErrorString(3))
 }
 
-func create(t *testing.T) (*wrapper, Device) {
+func create(t *testing.T) (*API, Device) {
 	w, err := New("")
 	require.NoError(t, err)
 
