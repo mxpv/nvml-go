@@ -140,8 +140,12 @@ func (a API) Init() error {
 // unloads nvml.dll via UnloadLibrary call.
 func (a API) Shutdown() error {
 	err := a.call(a.nvmlShutdown)
-	a.dll.Release()
+	a.ReleaseDLL()
 	return err
+}
+
+func (a API) ReleaseDLL() error {
+	return a.dll.Release()
 }
 
 // ErrorString returns a string representation of the error.
