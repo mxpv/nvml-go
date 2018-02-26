@@ -2,6 +2,7 @@ package nvml
 
 import (
 	"C"
+	"os"
 	"syscall"
 	"unsafe"
 
@@ -158,7 +159,7 @@ func (a API) ErrorString(result uintptr) string {
 // New creates nvml.dll wrapper
 func New(path string) (*API, error) {
 	if path == "" {
-		path = "C:\\Program Files\\NVIDIA Corporation\\NVSMI\\nvml.dll"
+		path = os.ExpandEnv("$ProgramW6432\\NVIDIA Corporation\\NVSMI\\nvml.dll")
 	}
 
 	dll, err := syscall.LoadDLL(path)
