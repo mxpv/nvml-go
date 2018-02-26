@@ -108,7 +108,7 @@ func (a API) DeviceGetBridgeChipInfo() {
 }
 
 // DeviceGetClock retrieves the clock speed for the clock specified by the clock type and clock ID.
-func (a API) DeviceGetClock(device Device, clockType ClockType, clockID ClockID) (clockMHz uint, err error) {
+func (a API) DeviceGetClock(device Device, clockType ClockType, clockID ClockID) (clockMHz uint32, err error) {
 	err = a.call(a.nvmlDeviceGetClock, uintptr(device), uintptr(clockType), uintptr(clockID), uintptr(unsafe.Pointer(&clockMHz)))
 	return
 }
