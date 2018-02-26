@@ -1,5 +1,22 @@
 package nvml
 
+// #define NVML_DEVICE_PCI_BUS_ID_BUFFER_SIZE 16
+// typedef struct nvmlPciInfo_st {
+//     char busId[NVML_DEVICE_PCI_BUS_ID_BUFFER_SIZE]; //!< The tuple domain:bus:device.function PCI identifier
+//     unsigned int domain; //!< The PCI domain on which the device's bus resides, 0 to 0xffff
+//     unsigned int bus; //!< The bus on which the device resides, 0 to 0xff
+//     unsigned int device; //!< The device's id on the bus, 0 to 31
+//     unsigned int pciDeviceId; //!< The combined 16-bit device id and 16-bit vendor id
+//
+//     // Added in NVML 2.285 API
+//     unsigned int pciSubSystemId;
+//
+//     // NVIDIA reserved for internal use only
+//     unsigned int reserved0;
+//     unsigned int reserved1;
+//     unsigned int reserved2;
+//     unsigned int reserved3;
+// } nvmlPciInfo_t;
 // #include <stdlib.h>
 import "C"
 
@@ -537,7 +554,19 @@ func (a API) DeviceGetP2PStatus() error {
 }
 
 func (a API) DeviceGetPCIInfo(device Device) (*PCIInfo, error) {
-	return nil, ErrNotImplemented
+	var pci C.nvmlPciInfo_t
+	if err := a.call(a.nvmlDeviceGetPciInfo, uintptr(device), uintptr(unsafe.Pointer(&pci))); err != nil {
+		return nil, err
+	}
+
+	return &PCIInfo{
+		BusID:          C.GoString(&pci.busId[0]),
+		Domain:         uint32(pci.domain),
+		Bus:            uint32(pci.bus),
+		Device:         uint32(pci.device),
+		PCIDeviceID:    uint32(pci.pciDeviceId),
+		PCISubsystemID: uint32(pci.pciSubSystemId),
+	}, nil
 }
 
 // DeviceGetPcieReplayCounter retrieve the PCIe replay counter.
