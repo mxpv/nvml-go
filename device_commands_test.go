@@ -77,14 +77,6 @@ func TestDeviceSetGPUOperationMode(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestDeviceSetPersistenceMode(t *testing.T) {
-	w, device := create(t)
-	defer w.Shutdown()
-
-	err := w.DeviceSetPersistenceMode(device, true)
-	require.NoError(t, err)
-}
-
 func TestDeviceSetPowerManagementLimit(t *testing.T) {
 	w, device := create(t)
 	defer w.Shutdown()

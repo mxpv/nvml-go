@@ -24,13 +24,6 @@ import (
 	"unsafe"
 )
 
-// DeviceClearCpuAffinity clears all affinity bindings for the calling thread. Note, this is a change as of version 8.0
-// as older versions cleared the affinity for a calling process and all children.
-func (a API) DeviceClearCpuAffinity(device Device) (err error) {
-	err = a.call(a.nvmlDeviceClearCpuAffinity, uintptr(device))
-	return
-}
-
 // DeviceGetAPIRestriction retrieves the root/admin permissions on the target API.
 // See nvmlRestrictedAPI_t for the list of supported APIs.
 // If an API is restricted only root users can call that API.
@@ -174,14 +167,6 @@ func (a API) DeviceGetComputeRunningProcesses(device Device) ([]ProcessInfo, err
 // DeviceGetCount retrieves the number of compute devices in the system. A compute device is a single GPU.
 func (a API) DeviceGetCount() (count uint32, err error) {
 	err = a.call(a.nvmlDeviceGetCount, uintptr(unsafe.Pointer(&count)))
-	return
-}
-
-// DeviceGetCPUAffinity retrieves an array of unsigned ints (sized to cpuSetSize) of bitmasks with the ideal CPU
-// affinity for the device. For example, if processors 0, 1, 32, and 33 are ideal for the device and
-// cpuSetSize == 2, result[0] = 0x3, result[1] = 0x3
-func (a API) DeviceGetCPUAffinity(device Device, cpuSetSize uint32) (cpuSet uint32, err error) {
-	err = a.call(a.nvmlDeviceGetCpuAffinity, uintptr(device), uintptr(cpuSetSize), uintptr(unsafe.Pointer(&cpuSet)))
 	return
 }
 
@@ -589,25 +574,6 @@ func (a API) DeviceGetPerformanceState(device Device) (state PState, err error) 
 	return
 }
 
-// DeviceGetPersistenceMode eetrieves the persistence mode associated with this device.
-// When driver persistence mode is enabled the driver software state is not torn down when the last client disconnects.
-// By default this feature is disabled.
-func (a API) DeviceGetPersistenceMode(device Device) (enabled bool, err error) {
-	var state int32
-	err = a.call(a.nvmlDeviceGetPersistenceMode, uintptr(device), uintptr(unsafe.Pointer(&state)))
-	if err != nil {
-		return
-	}
-
-	if state > 0 {
-		enabled = true
-	} else {
-		enabled = false
-	}
-
-	return
-}
-
 // DeviceGetPowerManagementDefaultLimit retrieves default power management limit on this device, in milliwatts.
 // Default power management limit is a power management limit that the device boots with.
 func (a API) DeviceGetPowerManagementDefaultLimit(device Device) (defaultLimit uint32, err error) {
@@ -884,13 +850,6 @@ func (a API) DeviceSetAutoBoostedClocksEnabled(device Device, enabled bool) erro
 	}
 
 	return a.call(a.nvmlDeviceSetAutoBoostedClocksEnabled, uintptr(device), uintptr(state))
-}
-
-// DeviceSetCpuAffinity sets the ideal affinity for the calling thread and device using the guidelines given in
-// DeviceGetCPUAffinity(). Note, this is a change as of version 8.0. Older versions set the affinity for a calling
-// process and all children. Currently supports up to 64 processors.
-func (a API) DeviceSetCpuAffinity(device Device) error {
-	return a.call(a.nvmlDeviceSetCpuAffinity, uintptr(device))
 }
 
 // DeviceSetDefaultAutoBoostedClocksEnabled tries to set the default state of Auto Boosted clocks on a device.

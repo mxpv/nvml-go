@@ -7,14 +7,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestDeviceClearCpuAffinity(t *testing.T) {
-	w, device := create(t)
-	defer w.Shutdown()
-
-	err := w.DeviceClearCpuAffinity(device)
-	require.NoError(t, err)
-}
-
 func TestDeviceGetAPIRestriction(t *testing.T) {
 	w, device := create(t)
 	defer w.Shutdown()
@@ -130,14 +122,6 @@ func TestDeviceGetCount(t *testing.T) {
 	count, err := w.DeviceGetCount()
 	require.NoError(t, err)
 	require.True(t, count > 0)
-}
-
-func TestDeviceGetCPUAffinity(t *testing.T) {
-	w, device := create(t)
-	defer w.Shutdown()
-
-	_, err := w.DeviceGetCPUAffinity(device, 1)
-	require.NoError(t, err)
 }
 
 func TestDeviceGetCudaComputeCapability(t *testing.T) {
@@ -493,14 +477,6 @@ func TestDeviceGetPerformanceState(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestDeviceGetPersistenceMode(t *testing.T) {
-	w, device := create(t)
-	defer w.Shutdown()
-
-	_, err := w.DeviceGetPersistenceMode(device)
-	require.NoError(t, err)
-}
-
 func TestDeviceGetPowerManagementDefaultLimit(t *testing.T) {
 	w, device := create(t)
 	defer w.Shutdown()
@@ -717,13 +693,5 @@ func TestDeviceSetAutoBoostedClocksEnabled(t *testing.T) {
 	defer w.Shutdown()
 
 	err := w.DeviceSetAutoBoostedClocksEnabled(device, false)
-	require.NoError(t, err)
-}
-
-func TestDeviceSetCpuAffinity(t *testing.T) {
-	w, device := create(t)
-	defer w.Shutdown()
-
-	err := w.DeviceSetCpuAffinity(device)
 	require.NoError(t, err)
 }

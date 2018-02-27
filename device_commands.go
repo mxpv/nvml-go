@@ -87,20 +87,6 @@ func (a API) DeviceSetGPUOperationMode(device Device, mode GPUOperationMode) err
 	return a.call(a.nvmlDeviceSetGpuOperationMode, uintptr(device), uintptr(mode))
 }
 
-// DeviceSetPersistenceMode sets the persistence mode for the device.
-// For Linux only. Requires root/admin permissions.
-// The persistence mode determines whether the GPU driver software is torn down after the last client exits.
-// This operation takes effect immediately. It is not persistent across reboots.
-// After each reboot the persistence mode is reset to "Disabled".
-func (a API) DeviceSetPersistenceMode(device Device, mode bool) error {
-	var modeInt int32 = 0
-	if mode {
-		modeInt = 1
-	}
-
-	return a.call(a.nvmlDeviceSetPersistenceMode, uintptr(device), uintptr(modeInt))
-}
-
 // DeviceSetPowerManagementLimit set new power limit of this device.
 // Requires root/admin permissions.
 // Note: Limit is not persistent across reboots or driver unloads.
